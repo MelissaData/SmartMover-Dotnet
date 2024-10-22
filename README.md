@@ -64,8 +64,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Download this project
 ```
-$ git clone https://github.com/MelissaData/SmartMover-Dotnet
-$ cd SmartMover-Dotnet
+git clone https://github.com/MelissaData/SmartMover-Dotnet
+cd SmartMover-Dotnet
 ```
 
 ## Windows
@@ -114,7 +114,7 @@ There are two modes:
 
 	The script will prompt the user for input(s), then use the provided input(s) to call the Cloud API. For example:
 	```
-	$ .\SmartMoverDotnet.ps1
+	.\SmartMoverDotnet.ps1
 	```
 
 - Command Line 
@@ -123,8 +123,8 @@ There are two modes:
 
 	You can pass a pafid, company, fullname, addressline1, city, state, postal code, country and a license string into `-pafid`, `-company`, `-fullname`, `-addressline1`, `-city`, `-state`, `-postalcode`, `-country` and `-license` parameters respectively to test the Cloud API. For example:
 	```
-    $ .\SmartMoverDotnet.ps1 -pafid "<pafid>" -company "Melissa" -fullname "Ray Melissa" -addressline1 "22382 Avenida Empresa" -city "Rancho Santa Margarita" -state "CA" -postalcode "92688" -country "US" -license "<your_license_string>"
-    $ .\SmartMoverDotnet.ps1 -license "<your_license_string>"
+    .\SmartMoverDotnet.ps1 -pafid "<pafid>" -company "Melissa" -fullname "Ray Melissa" -addressline1 "22382 Avenida Empresa" -city "Rancho Santa Margarita" -state "CA" -postalcode "92688" -country "US" -license "<your_license_string>"
+    .\SmartMoverDotnet.ps1 -license "<your_license_string>"
     ```
 
 This is the sample output from a successful setup for interactive mode:
@@ -182,7 +182,7 @@ There are two modes:
 
 	The script will prompt the user for input(s), then use the provided input(s) to call the Cloud API. For example:
 	```
-	$ ./SmartMoverDotnet.sh
+	./SmartMoverDotnet.sh
 	```
 
 - Command Line 
@@ -191,8 +191,8 @@ There are two modes:
 
 	You can pass a pafid, company, full name, address line 1, city, state, postal code, country, and a license string into `--pafid`, `--company`, `--fullname`, `--addressline1`, `--city`, `--state`, `--postal`, `--country` and `--license` parameters respectively to test the Cloud API. For example:
 	```
-    $ ./SmartMoverDotnet.sh --pafid "<pafid>" --company "Melissa" --addressline1 "22382 Avenida Empresa" --fullname "Ray Melissa" --city "Rancho Santa Margita" --state "CA" --postalcode "92688" --country "US" --license "<your_license_string>"
-    $ ./SmartMoverDotnet.sh --license "<your_license_string>"
+    ./SmartMoverDotnet.sh --pafid "<pafid>" --company "Melissa" --addressline1 "22382 Avenida Empresa" --fullname "Ray Melissa" --city "Rancho Santa Margita" --state "CA" --postalcode "92688" --country "US" --license "<your_license_string>"
+    ./SmartMoverDotnet.sh --license "<your_license_string>"
     ```
 
 This is the sample output from a successful setup for interactive mode:
