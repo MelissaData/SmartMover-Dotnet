@@ -3,9 +3,37 @@ using System.Security.Cryptography;
 
 namespace SmartMoverDotnet
 {
+  /// <summary>
+  /// Smart Mover checks whether a person or business at a given address has moved and,
+  /// if so, returns move details such as the new address, along with result codes that
+  /// describe the outcome. Requests are identified by a PAF ID.
+  ///
+  /// <para>High-level flow of this sample:</para>
+  /// <list type="number">
+  ///   <item><description>ARGS    - ParseArguments reads any --flag values off the command line.</description></item>
+  ///   <item><description>INPUT   - CallAPI fills in whatever wasn't supplied via interactive prompts.</description></item>
+  ///   <item><description>REQUEST - CallAPI builds the REST query string (license + PAF ID + name/company/address fields).</description></item>
+  ///   <item><description>CALL    - GetContents issues the GET request and pretty-prints the JSON response.</description></item>
+  /// </list>
+  ///
+  /// <para>This sample is a thin HTTP client: it builds a query string, sends a GET
+  /// request to the Smart Mover Cloud API, and prints the JSON response.</para>
+  ///
+  /// <para>Reference:</para>
+  /// <list type="bullet">
+  ///   <item><description>Documentation: https://docs.melissa.com/cloud-api/smartmover/smartmover-index.html</description></item>
+  ///   <item><description>Release notes: https://releasenotes.melissa.com/cloud-api/smartmover/</description></item>
+  ///   <item><description>Result codes: https://docs.melissa.com/melissa/result-codes/result-codes-index.html</description></item>
+  /// </list>
+  /// </summary>
   static class Program
   {
 
+    /// <summary>
+    /// Entry point. Reads the optional command-line arguments, then hands control to
+    /// CallAPI, which performs the actual request/response cycle.
+    /// </summary>
+    /// <param name="args">The raw command-line arguments.</param>
     static void Main(string[] args)
     {
       string baseServiceUrl = @"https://smartmover.melissadata.net/";
@@ -20,10 +48,30 @@ namespace SmartMoverDotnet
       string postalCode = "";
       string country = "";
 
+      // Populate any values passed on the command line, then run the lookup.
       ParseArguments(ref license, ref pafid, ref company, ref fullName, ref addressLine1, ref city, ref state, ref postalCode, ref country, args);
       CallAPI(baseServiceUrl, serviceEndpoint, license, pafid, company, fullName, addressLine1, city, state, postalCode, country);
     }
 
+    /// <summary>
+    /// Reads the supported command-line options and writes each recognized value into
+    /// its matching by-ref parameter. Any parameter left unset here falls back to an
+    /// interactive prompt later in <see cref="CallAPI"/>.
+    ///
+    /// <para>Recognized flags (each followed by its value, e.g. "--city Rancho Santa Margarita"):
+    /// --license/-l, --pafid, --company, --fullname, --addressline1, --city, --state,
+    /// --postalcode, --country.</para>
+    /// </summary>
+    /// <param name="license">Receives the Melissa license string, if supplied.</param>
+    /// <param name="pafid">Receives the PAF ID, if supplied.</param>
+    /// <param name="company">Receives the company name, if supplied.</param>
+    /// <param name="fullName">Receives the full name, if supplied.</param>
+    /// <param name="addressLine1">Receives the street address, if supplied.</param>
+    /// <param name="city">Receives the city, if supplied.</param>
+    /// <param name="state">Receives the state, if supplied.</param>
+    /// <param name="postalCode">Receives the postal code, if supplied.</param>
+    /// <param name="country">Receives the country, if supplied.</param>
+    /// <param name="args">The raw command-line arguments to parse.</param>
     static void ParseArguments(ref string license, ref string pafid, ref string company, ref string fullName, ref string addressLine1, ref string city, ref string state, ref string postalCode, ref string country, string[] args)
     {
       for (int i = 0; i < args.Length; i++)
@@ -94,6 +142,12 @@ namespace SmartMoverDotnet
       }
     }
 
+    /// <summary>
+    /// Issues the GET request against the Smart Mover endpoint and pretty-prints the
+    /// API call and the JSON response to the console.
+    /// </summary>
+    /// <param name="baseServiceUrl">The Smart Mover Cloud API base URL.</param>
+    /// <param name="requestQuery">The endpoint path plus query string built by <see cref="CallAPI"/>.</param>
     public static async Task GetContents(string baseServiceUrl, string requestQuery)
     {
       HttpClient client = new HttpClient();
@@ -101,6 +155,7 @@ namespace SmartMoverDotnet
       HttpResponseMessage response = await client.GetAsync(requestQuery);
 
       string text = await response.Content.ReadAsStringAsync();
+      // Re-serialize with indentation so the raw response is easier to read.
       var obj = JsonConvert.DeserializeObject(text);
       var prettyResponse = JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
 
@@ -124,6 +179,26 @@ namespace SmartMoverDotnet
       Console.WriteLine("\nAPI Response:");
       Console.WriteLine(prettyResponse);
     }
+
+    /// <summary>
+    /// Drives the interactive/CLI loop: gathers the required fields, builds and submits
+    /// the REST query, prints the result, and optionally repeats for another record.
+    ///
+    /// <para>In interactive mode (no record args) it loops, asking for a new record each pass
+    /// until the user answers "N". In one-shot mode (any record arg supplied) it runs a single
+    /// pass and exits.</para>
+    /// </summary>
+    /// <param name="baseServiceUrl">The Smart Mover Cloud API base URL.</param>
+    /// <param name="serviceEndPoint">The specific Smart Mover endpoint path to call.</param>
+    /// <param name="license">The Melissa license string sent with every request.</param>
+    /// <param name="pafid">A PAF ID to use in one-shot mode; if all input fields are empty, the program prompts interactively.</param>
+    /// <param name="company">A company name to look up in one-shot mode.</param>
+    /// <param name="fullName">A full name to look up in one-shot mode.</param>
+    /// <param name="addressLine1">A street address to look up in one-shot mode.</param>
+    /// <param name="city">A city to look up in one-shot mode.</param>
+    /// <param name="state">A state to look up in one-shot mode.</param>
+    /// <param name="postalCode">A postal code to look up in one-shot mode.</param>
+    /// <param name="country">A country to look up in one-shot mode.</param>
     static void CallAPI(string baseServiceUrl, string serviceEndPoint, string license, string pafid, string company, string fullName, string addressLine1, string city, string state, string postalCode, string country)
     {
       Console.WriteLine("\n================= WELCOME TO MELISSA SMART MOVER CLOUD API =================\n");
@@ -141,6 +216,7 @@ namespace SmartMoverDotnet
         string inputPostalCode = "";
         string inputCountry = "";
 
+        // No values were supplied via command line, so prompt for every field.
         if (string.IsNullOrEmpty(pafid) && string.IsNullOrEmpty(company) && string.IsNullOrEmpty(fullName) && string.IsNullOrEmpty(addressLine1) && string.IsNullOrEmpty(city) && string.IsNullOrEmpty(state) && string.IsNullOrEmpty(postalCode) && string.IsNullOrEmpty(country))
         {
           Console.WriteLine("\nFill in each value to see results");
@@ -171,6 +247,7 @@ namespace SmartMoverDotnet
         }
         else
         {
+          // At least one field was supplied via command line; use those values as-is.
           inputPafid = pafid;
           inputCompany = company;
           inputFullName = fullName;
@@ -181,6 +258,7 @@ namespace SmartMoverDotnet
           inputCountry = country;
         }
 
+        // Prompt individually for any still-missing required field (all eight are required).
         while (string.IsNullOrEmpty(inputPafid) || string.IsNullOrEmpty(inputCompany) || string.IsNullOrEmpty(inputFullName) || string.IsNullOrEmpty(inputAddressLine1) || string.IsNullOrEmpty(inputCity) || string.IsNullOrEmpty(inputState) || string.IsNullOrEmpty(inputPostalCode) || string.IsNullOrEmpty(inputCountry))
         {
           Console.WriteLine("\nFill in missing required parameter");
@@ -234,6 +312,8 @@ namespace SmartMoverDotnet
           }
         }
 
+        // Map input fields to the API's expected query parameter names and
+        // request a JSON response.
         Dictionary<string, string> inputs = new Dictionary<string, string>()
                 {
                     { "format", "json" },
@@ -292,6 +372,8 @@ namespace SmartMoverDotnet
           }
         } while ((success != true) && (retryCounter < 5));
 
+        // If any input field came from the command line, treat this as a one-shot
+        // run rather than looping for additional records.
         bool isValid = false;
         if (!string.IsNullOrEmpty(pafid + company + fullName + addressLine1 + city + state + postalCode + country))
         {
@@ -299,6 +381,8 @@ namespace SmartMoverDotnet
           shouldContinueRunning = false;
         }
 
+        // Otherwise ask whether to test another record. Keep prompting until we get a
+        // valid Y/N. "N" ends the program; "Y" falls through to another pass.
         while (!isValid)
         {
           Console.WriteLine("\nTest another record? (Y/N)");
